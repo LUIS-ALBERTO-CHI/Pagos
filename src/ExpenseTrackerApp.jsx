@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
@@ -422,6 +420,7 @@ const ExpenseTrackerApp = () => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button onClick={exportToCSV} className="btn-icon-subtle" title="Exportar a Excel/CSV">
                         <Download size={20} />
+                    </button>
                     <input 
                       type="file" 
                       ref={fileInputRef} 
