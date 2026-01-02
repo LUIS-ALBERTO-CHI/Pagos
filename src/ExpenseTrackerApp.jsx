@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale';
@@ -13,6 +15,9 @@ const ExpenseTrackerApp = () => {
   const [password, setPassword] = useState('');
   const [cards, setCards] = useState([]);
   const [otherExpenses, setOtherExpenses] = useState([]);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isCloudConnected, setIsCloudConnected] = useState(true);
+  const fileInputRef = useRef(null);
   
   // Modales
   const [showAddCard, setShowAddCard] = useState(false);
@@ -91,6 +96,7 @@ const ExpenseTrackerApp = () => {
 
   useEffect(() => {
     if (currentUser) {
+      // 1. Cargar de LocalStorage (Inmediato)
       const stored = localStorage.getItem(`cards_${currentUser}`);
       if (stored) {
         setCards(JSON.parse(stored));
@@ -99,15 +105,51 @@ const ExpenseTrackerApp = () => {
       if (storedExpenses) {
         setOtherExpenses(JSON.parse(storedExpenses));
       }
+
+      // 2. Intentar cargar de la Nube (Vercel KV)
+      setIsSyncing(true);
+      fetch(`/api/expenses?user=${currentUser}`)
+        .then(res => {
+          if (!res.ok) throw new Error('No api');
+          return res.json();
+        })
+        .then(data => {
+          if (data) {
+            if (data.cards) setCards(data.cards);
+            if (data.otherExpenses) setOtherExpenses(data.otherExpenses);
+          }
+          setIsCloudConnected(true);
+        })
+        .catch(() => setIsCloudConnected(false))
+        .finally(() => setIsSyncing(false));
     }
   }, [currentUser]);
 
   useEffect(() => {
     if (currentUser) {
-      if (cards.length > 0) {
-        localStorage.setItem(`cards_${currentUser}`, JSON.stringify(cards));
-      }
+      // Guardar Local
+      localStorage.setItem(`cards_${currentUser}`, JSON.stringify(cards));
       localStorage.setItem(`expenses_${currentUser}`, JSON.stringify(otherExpenses));
+
+      // Guardar Nube (Debounce simple)
+      const timer = setTimeout(() => {
+        if (isCloudConnected) {
+          setIsSyncing(true);
+          fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: currentUser, cards, otherExpenses })
+          })
+          .then(res => {
+             if(res.ok) setIsCloudConnected(true);
+             else setIsCloudConnected(false);
+          })
+          .catch(() => setIsCloudConnected(false))
+          .finally(() => setIsSyncing(false));
+        }
+      }, 1000); // Espera 1 segundo después del último cambio para guardar
+
+      return () => clearTimeout(timer);
     }
   }, [cards, otherExpenses, currentUser]);
 
@@ -284,6 +326,36 @@ const ExpenseTrackerApp = () => {
     setToast({ message: 'Reporte descargado exitosamente', type: 'success' });
   };
 
+  const exportBackup = () => {
+    const data = {
+      cards,
+      otherExpenses,
+      user: username,
+      timestamp: new Date().toISOString()
+    };
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(JSON.stringify(data))}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = `respaldo_gastos_${format(new Date(), 'yyyy-MM-dd')}.json`;
+    link.click();
+    setToast({ message: 'Copia de seguridad descargada', type: 'success' });
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.onload = (e) => {
+      const parsedData = JSON.parse(e.target.result);
+      setCards(parsedData.cards || []);
+      setOtherExpenses(parsedData.otherExpenses || []);
+      setToast({ message: 'Datos restaurados correctamente', type: 'success' });
+    };
+  };
+
   // --- RENDER LOGIN ---
   if (!isLoggedIn) {
     return (
@@ -350,7 +422,28 @@ const ExpenseTrackerApp = () => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button onClick={exportToCSV} className="btn-icon-subtle" title="Exportar a Excel/CSV">
                         <Download size={20} />
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      style={{ display: 'none' }} 
+                      onChange={handleFileChange} 
+                      accept=".json" 
+                    />
+                    <button onClick={exportBackup} className="btn-icon-subtle" title="Guardar Respaldo (JSON)">
+                        <FileJson size={20} />
                     </button>
+                    <button onClick={handleImportClick} className="btn-icon-subtle" title="Cargar Respaldo">
+                        <Upload size={20} />
+                    </button>
+                    <div className="btn-icon-subtle" title={isCloudConnected ? "Sincronizado con Vercel" : "Solo Local (Sin conexión a Vercel)"}>
+                        {isSyncing ? (
+                           <RefreshCw size={20} className="animate-spin" />
+                        ) : isCloudConnected ? (
+                           <Cloud size={20} className="text-green" />
+                        ) : (
+                           <CloudOff size={20} className="text-gray" />
+                        )}
+                    </div>
                     <button onClick={() => setShowThemeSelector(true)} className="btn-icon-subtle" title="Cambiar tema">
                         <Palette size={20} />
                     </button>
