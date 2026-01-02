@@ -354,6 +354,29 @@ const ExpenseTrackerApp = () => {
     };
   };
 
+  const retrySync = () => {
+    if (!currentUser) return;
+    setIsSyncing(true);
+    // 1. Verificar conexión
+    fetch(`/api/expenses?user=${currentUser}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Error de conexión');
+        setIsCloudConnected(true);
+        // 2. Forzar guardado de los datos actuales en la nube
+        return fetch('/api/expenses', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: currentUser, cards, otherExpenses })
+        });
+      })
+      .then(() => setToast({ message: 'Sincronizado con la nube', type: 'success' }))
+      .catch(() => {
+         setIsCloudConnected(false);
+         setToast({ message: 'No se pudo conectar a la nube', type: 'error' });
+      })
+      .finally(() => setIsSyncing(false));
+  };
+
   // --- RENDER LOGIN ---
   if (!isLoggedIn) {
     return (
@@ -434,7 +457,7 @@ const ExpenseTrackerApp = () => {
                     <button onClick={handleImportClick} className="btn-icon-subtle" title="Cargar Respaldo">
                         <Upload size={20} />
                     </button>
-                    <div className="btn-icon-subtle" title={isCloudConnected ? "Sincronizado con Vercel" : "Solo Local (Sin conexión a Vercel)"}>
+                    <button onClick={retrySync} className="btn-icon-subtle" title={isCloudConnected ? "Sincronizado (Click para forzar)" : "Desconectado (Click para reintentar)"}>
                         {isSyncing ? (
                            <RefreshCw size={20} className="animate-spin" />
                         ) : isCloudConnected ? (
@@ -442,7 +465,7 @@ const ExpenseTrackerApp = () => {
                         ) : (
                            <CloudOff size={20} className="text-gray" />
                         )}
-                    </div>
+                    </button>
                     <button onClick={() => setShowThemeSelector(true)} className="btn-icon-subtle" title="Cambiar tema">
                         <Palette size={20} />
                     </button>
