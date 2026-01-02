@@ -731,3 +731,38 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .toast-success { border-left: 4px solid #10b981; }
 .toast-error { border-left: 4px solid #ef4444; }
+
+/* --- Mobile Card Buttons Fix --- */
+@media (max-width: 480px) {
+  .card-actions-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .action-buttons-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr; /* Edit (icon), Delete (icon), Pay (text) */
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .btn-action-pay, 
+  .btn-action-edit, 
+  .btn-action-delete {
+    padding: 0.7rem 0.5rem;
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Center history button on mobile */
+  .card-actions-footer .btn-text-sm {
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.03);
+    border-radius: var(--radius-sm);
+  }
+}

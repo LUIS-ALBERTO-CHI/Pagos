@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw, Trash2 } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale';
@@ -441,7 +441,7 @@ const ExpenseTrackerApp = () => {
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={exportToCSV} className="btn-icon-subtle" title="Exportar a Excel/CSV">
+                    <button onClick={exportToCSV} className="btn-icon-subtle mobile-hide" title="Exportar a Excel/CSV">
                         <Download size={20} />
                     </button>
                     <input 
@@ -591,8 +591,10 @@ const ExpenseTrackerApp = () => {
                                         setShowEditCard(true);
                                     }}
                                     className="btn-action-edit"
+                                    title="Editar"
                                 >
-                                    Editar
+                                    <span className="mobile-hide">Editar</span>
+                                    <Edit size={18} className="desktop-hide" />
                                 </button>
                                 <button 
                                     onClick={() => {
@@ -600,8 +602,10 @@ const ExpenseTrackerApp = () => {
                                         setShowDeleteConfirm(true);
                                     }}
                                     className="btn-action-delete"
+                                    title="Eliminar"
                                 >
-                                    Eliminar
+                                    <span className="mobile-hide">Eliminar</span>
+                                    <Trash2 size={18} className="desktop-hide" />
                                 </button>
                                 <button 
                                     onClick={() => {
