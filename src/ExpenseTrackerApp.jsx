@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download } from 'lucide-react';
+import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale';
@@ -17,6 +17,8 @@ const ExpenseTrackerApp = () => {
   // Modales
   const [showAddCard, setShowAddCard] = useState(false);
   const [showAddPayment, setShowAddPayment] = useState(false);
+  const [showEditCard, setShowEditCard] = useState(false);
+  const [editingCard, setEditingCard] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
@@ -144,6 +146,28 @@ const ExpenseTrackerApp = () => {
       setNewCard({ name: '', totalDebt: '', color: '#4facfe' });
       setShowAddCard(false);
       setToast({ message: 'Tarjeta agregada correctamente', type: 'success' });
+    }
+  };
+
+  const updateCard = (e) => {
+    if (e) e.preventDefault();
+    if (editingCard.name && editingCard.totalDebt) {
+      const updatedCards = cards.map(c => {
+        if (c.id === editingCard.id) {
+          return {
+            ...c,
+            name: editingCard.name,
+            totalDebt: parseFloat(editingCard.totalDebt),
+            currentDebt: parseFloat(editingCard.currentDebt),
+            color: editingCard.color
+          };
+        }
+        return c;
+      });
+      setCards(updatedCards);
+      setShowEditCard(false);
+      setEditingCard(null);
+      setToast({ message: 'Tarjeta actualizada', type: 'success' });
     }
   };
 
@@ -448,6 +472,15 @@ const ExpenseTrackerApp = () => {
                             <div className="action-buttons-group">
                                 <button 
                                     onClick={() => {
+                                        setEditingCard({...card});
+                                        setShowEditCard(true);
+                                    }}
+                                    className="btn-action-edit"
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    onClick={() => {
                                         setCardToDelete(card);
                                         setShowDeleteConfirm(true);
                                     }}
@@ -551,6 +584,48 @@ const ExpenseTrackerApp = () => {
                 </div>
               </div>
               <button type="submit" className="btn-primary mt-2">Guardar Tarjeta</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Card Modal */}
+      {showEditCard && editingCard && (
+        <div className="modal-backdrop">
+          <div className="clean-card modal-content-light">
+            <div className="header-flex mb-4">
+              <h2 className="title-md text-dark">Editar Tarjeta</h2>
+              <button onClick={() => setShowEditCard(false)} className="btn-icon-subtle"><X size={20} /></button>
+            </div>
+            <form onSubmit={updateCard} className="form-stack">
+              <div>
+                  <label className="input-label">Nombre</label>
+                  <input type="text" value={editingCard.name}
+                  onChange={(e) => setEditingCard({ ...editingCard, name: e.target.value })} className="input-field"/>
+              </div>
+              <div className="grid-2">
+                <div>
+                    <label className="input-label">Límite / Total</label>
+                    <input type="number" step="0.01" value={editingCard.totalDebt}
+                    onChange={(e) => setEditingCard({ ...editingCard, totalDebt: e.target.value })} className="input-field"/>
+                </div>
+                <div>
+                    <label className="input-label">Deuda Actual</label>
+                    <input type="number" step="0.01" value={editingCard.currentDebt}
+                    onChange={(e) => setEditingCard({ ...editingCard, currentDebt: e.target.value })} className="input-field"/>
+                </div>
+              </div>
+              <div>
+                <p className="input-label mb-2">Color distintivo</p>
+                <div className="color-picker">
+                  {colors.map(color => (
+                    <button key={color} type="button" onClick={() => setEditingCard({ ...editingCard, color })}
+                      className={`color-swatch ${editingCard.color === color ? 'active' : ''}`}
+                      style={{ backgroundColor: color }}/>
+                  ))}
+                </div>
+              </div>
+              <button type="submit" className="btn-primary mt-2">Guardar Cambios</button>
             </form>
           </div>
         </div>

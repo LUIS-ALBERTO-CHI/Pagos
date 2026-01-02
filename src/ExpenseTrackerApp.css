@@ -456,6 +456,19 @@ body {
 }
 .btn-action-pay:hover { background: #334155; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
+.btn-action-edit {
+  background: transparent;
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-action-edit:hover { background: var(--input-bg); border-color: var(--text-gray); }
+
 .btn-action-delete {
   background: transparent;
   color: #ef4444;
