@@ -20,12 +20,31 @@ export default async function handler(request, response) {
     return response.status(200).end();
   }
 
-  const { user } = request.method === 'GET' ? request.query : request.body;
+  // Parsear cookies para recuperar sesión
+  const cookies = (request.headers.cookie || '').split(';').reduce((acc, cookie) => {
+    const [k, v] = cookie.trim().split('=');
+    if (k && v) acc[k] = decodeURIComponent(v);
+    return acc;
+  }, {});
+
+  // Manejo de Logout (DELETE)
+  if (request.method === 'DELETE') {
+    response.setHeader('Set-Cookie', 'user=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax');
+    return response.status(200).json({ success: true, message: 'Sesión cerrada' });
+  }
+
+  let { user } = request.method === 'GET' ? request.query : (request.body || {});
+
+  // Si no viene en la petición, intentar recuperar de cookie
+  if (!user && cookies.user) user = cookies.user;
 
   if (!user) {
     console.error("--> ERROR: Falta usuario");
     return response.status(400).json({ error: 'Usuario requerido' });
   }
+
+  // Guardar/Renovar cookie (30 días)
+  response.setHeader('Set-Cookie', `user=${user}; Path=/; HttpOnly; Max-Age=2592000; SameSite=Lax`);
 
   const key = `expense_tracker:${user}`;
 
