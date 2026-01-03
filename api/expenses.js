@@ -9,7 +9,7 @@ export default async function handler(request, response) {
 
   // Configuración CORS
   response.setHeader('Access-Control-Allow-Credentials', true);
-  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Origin', request.headers.origin || '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
   response.setHeader(
     'Access-Control-Allow-Headers',
@@ -22,8 +22,8 @@ export default async function handler(request, response) {
 
   // Parsear cookies para recuperar sesión
   const cookies = (request.headers.cookie || '').split(';').reduce((acc, cookie) => {
-    const [k, v] = cookie.trim().split('=');
-    if (k && v) acc[k] = decodeURIComponent(v);
+    const [k, ...v] = cookie.trim().split('=');
+    if (k && v.length > 0) acc[k] = decodeURIComponent(v.join('='));
     return acc;
   }, {});
 
@@ -44,7 +44,7 @@ export default async function handler(request, response) {
   }
 
   // Guardar/Renovar cookie (30 días)
-  response.setHeader('Set-Cookie', `user=${user}; Path=/; HttpOnly; Max-Age=2592000; SameSite=Lax`);
+  response.setHeader('Set-Cookie', `user=${encodeURIComponent(user)}; Path=/; HttpOnly; Max-Age=2592000; SameSite=Lax`);
 
   const key = `expense_tracker:${user}`;
 
