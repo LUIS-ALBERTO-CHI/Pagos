@@ -399,6 +399,7 @@ const ExpenseTrackerApp = () => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="input-field"
+                  style={{ color: '#333', backgroundColor: '#fff' }}
                 />
               </div>
               <div>
@@ -409,6 +410,7 @@ const ExpenseTrackerApp = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-field"
+                  style={{ color: '#333', backgroundColor: '#fff' }}
                 />
               </div>
               {loginError && (
@@ -685,12 +687,12 @@ const ExpenseTrackerApp = () => {
               <div>
                   <label className="input-label">Nombre</label>
                   <input type="text" placeholder="Ej. Visa Oro" value={newCard.name}
-                  onChange={(e) => setNewCard({ ...newCard, name: e.target.value })} className="input-field"/>
+                  onChange={(e) => setNewCard({ ...newCard, name: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
               </div>
               <div>
                   <label className="input-label">Deuda Total</label>
                   <input type="number" placeholder="0.00" step="0.01" value={newCard.totalDebt}
-                  onChange={(e) => setNewCard({ ...newCard, totalDebt: e.target.value })} className="input-field"/>
+                  onChange={(e) => setNewCard({ ...newCard, totalDebt: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
               </div>
               <div>
                 <p className="input-label mb-2">Color distintivo</p>
@@ -720,18 +722,18 @@ const ExpenseTrackerApp = () => {
               <div>
                   <label className="input-label">Nombre</label>
                   <input type="text" value={editingCard.name}
-                  onChange={(e) => setEditingCard({ ...editingCard, name: e.target.value })} className="input-field"/>
+                  onChange={(e) => setEditingCard({ ...editingCard, name: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
               </div>
               <div className="grid-2">
                 <div>
                     <label className="input-label">Límite / Total</label>
                     <input type="number" step="0.01" value={editingCard.totalDebt}
-                    onChange={(e) => setEditingCard({ ...editingCard, totalDebt: e.target.value })} className="input-field"/>
+                    onChange={(e) => setEditingCard({ ...editingCard, totalDebt: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
                 </div>
                 <div>
                     <label className="input-label">Deuda Actual</label>
                     <input type="number" step="0.01" value={editingCard.currentDebt}
-                    onChange={(e) => setEditingCard({ ...editingCard, currentDebt: e.target.value })} className="input-field"/>
+                    onChange={(e) => setEditingCard({ ...editingCard, currentDebt: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
                 </div>
               </div>
               <div>
@@ -766,7 +768,7 @@ const ExpenseTrackerApp = () => {
               <div>
                   <label className="input-label">Monto a pagar</label>
                   <input type="number" placeholder="0.00" step="0.01" value={newPayment.amount}
-                  onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })} className="input-field" autoFocus/>
+                  onChange={(e) => setNewPayment({ ...newPayment, amount: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }} autoFocus/>
               </div>
               <div className="grid-2">
                   <div>
@@ -785,7 +787,7 @@ const ExpenseTrackerApp = () => {
                         type="text" 
                         placeholder="Opcional" 
                         value={newPayment.description}
-                      onChange={(e) => setNewPayment({ ...newPayment, description: e.target.value })} className="input-field"/>
+                      onChange={(e) => setNewPayment({ ...newPayment, description: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
                   </div>
               </div>
               <button type="submit" className="btn-primary mt-2">Confirmar Pago</button>
@@ -821,13 +823,13 @@ const ExpenseTrackerApp = () => {
               <div>
                   <label className="input-label">Concepto</label>
                   <input type="text" placeholder="Ej. Alquiler, Internet..." value={newExpense.name}
-                  onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })} className="input-field" autoFocus/>
+                  onChange={(e) => setNewExpense({ ...newExpense, name: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }} autoFocus/>
               </div>
               <div className="grid-2">
                 <div>
                     <label className="input-label">Monto</label>
                     <input type="number" placeholder="0.00" step="0.01" value={newExpense.amount}
-                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} className="input-field"/>
+                    onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })} className="input-field" style={{ color: '#333', backgroundColor: '#fff' }}/>
                 </div>
                 <div>
                     <label className="input-label">Fecha</label>
