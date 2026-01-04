@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw, Trash2 } from 'lucide-react';
+import { CreditCard, Plus, X, LogOut, TrendingDown, Wallet, DollarSign, History, ArrowUpRight, ArrowDownLeft, LayoutGrid, List, Filter, Home, Zap, Utensils, Car, ShoppingBag, Smartphone, Palette, Check, CheckCircle, AlertCircle, Download, Edit, FileJson, Upload, Cloud, CloudOff, RefreshCw, Trash2, Eye, EyeOff } from 'lucide-react';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { es } from 'date-fns/locale';
@@ -11,6 +11,7 @@ const ExpenseTrackerApp = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [cards, setCards] = useState([]);
   const [otherExpenses, setOtherExpenses] = useState([]);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -31,6 +32,8 @@ const ExpenseTrackerApp = () => {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [expenseToDelete, setExpenseToDelete] = useState(null);
+  const [showDeleteExpenseConfirm, setShowDeleteExpenseConfirm] = useState(false);
 
   // Estado para notificaciones (Toasts)
   const [toast, setToast] = useState(null);
@@ -257,9 +260,35 @@ const ExpenseTrackerApp = () => {
     }
   };
 
-  const deleteExpense = (id) => {
-    setOtherExpenses(otherExpenses.filter(e => e.id !== id));
-    setToast({ message: 'Gasto eliminado', type: 'success' });
+  const promptDeleteExpense = (expense) => {
+    setExpenseToDelete(expense);
+    setShowDeleteExpenseConfirm(true);
+  };
+
+  const confirmDeleteExpense = () => {
+    if (expenseToDelete) {
+      setOtherExpenses(otherExpenses.filter(e => e.id !== expenseToDelete.id));
+      setToast({ message: 'Gasto eliminado', type: 'success' });
+      setShowDeleteExpenseConfirm(false);
+      setExpenseToDelete(null);
+    }
+  };
+
+  const deletePayment = (paymentId, amount) => {
+    if (!historyCard) return;
+    const updatedCards = cards.map(c => {
+      if (c.id === historyCard.id) {
+        return {
+          ...c,
+          currentDebt: c.currentDebt + amount, // Restaurar la deuda
+          payments: c.payments.filter(p => p.id !== paymentId)
+        };
+      }
+      return c;
+    });
+    setCards(updatedCards);
+    setHistoryCard(updatedCards.find(c => c.id === historyCard.id));
+    setToast({ message: 'Pago eliminado y deuda restaurada', type: 'success' });
   };
 
   const confirmDeleteCard = () => {
@@ -404,14 +433,23 @@ const ExpenseTrackerApp = () => {
               </div>
               <div>
                 <label className="input-label">Contraseña</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field"
-                  style={{ color: '#333', backgroundColor: '#fff' }}
-                />
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field"
+                    style={{ color: '#333', backgroundColor: '#fff', paddingRight: '40px' }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#666' }}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               {loginError && (
                 <p className="error-text">{loginError}</p>
@@ -661,7 +699,7 @@ const ExpenseTrackerApp = () => {
                             <div className="text-right mr-4">
                                 <p className="text-dark font-bold">-${expense.amount.toFixed(2)}</p>
                             </div>
-                            <button onClick={() => deleteExpense(expense.id)} className="btn-icon-subtle text-red">
+                            <button onClick={() => promptDeleteExpense(expense)} className="btn-icon-subtle text-red">
                                 <X size={16} />
                             </button>
                         </div>
@@ -913,6 +951,13 @@ const ExpenseTrackerApp = () => {
                           <p className="text-xs text-gray">{payment.date}</p>
                       </div>
                       <span className="text-green font-bold">+${payment.amount.toFixed(2)}</span>
+                      <button 
+                        onClick={() => deletePayment(payment.id, payment.amount)}
+                        className="btn-icon-subtle text-red ml-2"
+                        title="Eliminar pago (Restaurar deuda)"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                   </div>
                   ))
               )}
@@ -942,6 +987,21 @@ const ExpenseTrackerApp = () => {
                   <span className="text-sm font-bold text-dark">{t.name}</span>
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Expense Confirmation Modal */}
+      {showDeleteExpenseConfirm && expenseToDelete && (
+        <div className="modal-backdrop">
+          <div className="clean-card modal-content-light text-center">
+            <div className="icon-circle-large bg-red-soft mx-auto mb-4"><X size={32} className="text-red" /></div>
+            <h3 className="title-md text-dark mb-2">¿Eliminar gasto?</h3>
+            <p className="text-gray mb-6">Se eliminará: <strong>{expenseToDelete.name}</strong> (${expenseToDelete.amount})</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowDeleteExpenseConfirm(false)} className="btn-secondary flex-1">Cancelar</button>
+              <button onClick={confirmDeleteExpense} className="btn-danger flex-1">Eliminar</button>
             </div>
           </div>
         </div>
